@@ -5,7 +5,7 @@ const app = new Koa();
 const server = require("http").Server(app.callback());
 const { Nuxt, Builder } = require("nuxt");
 const nuxtConfig = require("../nuxt.config.js");
-const socketIO = require('./socket')
+const socketIO = require("./socket");
 
 app.use(
   body({
@@ -73,11 +73,11 @@ async function start() {
       });
     }
   });
-  const router = require("./routers/index"); //所有koa2 route的配置加载
-  app.use(router.routes());
+  // const router = require("./routers/index"); //所有koa2 route的配置加载
+  // app.use(router.routes());
 
   // io.path('/meet')
-  socketIO(server)
+  socketIO(server);
 
   server.listen(port, host);
   // server.timeout = 5 * 60 * 1000; //超时设置

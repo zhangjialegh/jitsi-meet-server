@@ -3,13 +3,33 @@
     <div>
       <Logo />
       <h1 class="title">nuxt-jitsi</h1>
-      <el-button type="primary" v-for="item in rooms" :key="item.id">{{item.id}}<i class="el-icon-upload el-icon--right"></i></el-button>
-      <div class="links">
-        <a href="https://nuxtjs.org/" target="_blank" rel="noopener noreferrer" class="button--green"> Documentation </a>
-        <a href="https://github.com/nuxt/nuxt.js" target="_blank" rel="noopener noreferrer" class="button--grey"> GitHub </a>
-      </div>
-      <el-button type="success" @click="send">成功按钮</el-button>
+      <el-checkbox-group v-model="checkboxGroup1" size="small">
+        <el-checkbox
+          :label="item.id"
+          border
+          v-for="item in rooms"
+          :key="item.id"
+          >{{ item.id }}</el-checkbox
+        ><br />
+      </el-checkbox-group>
+      <el-button type="success" @click="send">CALL</el-button>
     </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="calling"
+      width="30%"
+      center
+      append-to-body
+    >
+      <span
+        >来自<strong style="color: red">{{ caller && caller.id }}</strong
+        >的通话请求</span
+      >
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="close">取 消</el-button>
+        <el-button type="primary" @click="sure">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -19,63 +39,67 @@ export default {
     return {
       socket: null,
       jitsi: null,
-      rooms: []
-    }
+      caller: null,
+      rooms: [],
+      checkboxGroup1: [],
+      calling: false,
+    };
   },
-  beforeDestroy() {
+  destroyed() {
     if (this.socket) {
-      this.socket.emit('xxxxxx', this.socket)
-      this.socket.close()
+      this.socket.disconnect();
     }
   },
   mounted() {
-    console.log(this.$io, 'io')
-    this.socket = this.$io('http://localhost:3000', {
+    this.socket = this.$io("http://localhost:4004", {
       reconnectionDelayMax: 10000,
-      path: '/custom',
+      path: "/custom",
       query: {
-        token: '123',
-        listener: 'wg'
-      }
-    })
-    this.socket.on('connect', () => {
-      console.log(this.socket.connected) // true
-      this.socket.on('rooms', (m) => {
-        console.log(m,'client')
-        this.rooms = m
-      })
-    })
+        token: "123",
+      },
+    });
+    this.socket.on("connect", () => {
+      // console.log(this.socket.connected) // true
+      this.socket.on("rooms", (m) => {
+        this.rooms = m.filter((item) => item.id !== this.socket.id);
+      });
+      this.socket.on("call_" + this.socket.id, (caller) => {
+        this.calling = true;
+        this.caller = caller;
+      });
+    });
     // this.socket.on('disconnect', (reason) => {
     //   throw Error(reason)
     // })
   },
   methods: {
-    initJitsi(name) {
-      const domin = 'im-tj.btzh.cn'
-      this.jitsi = new window.JitsiMeetExternalAPI(domin, {
-        roomName: name || `abc${Date.now()}_` + (Math.random() * 80 + 20),
-        width: '100%',
-        height: '100%',
-        parentNode: document.querySelector('#jitsi_meet'),
-        // configOverwrite: jitsiConfig, // 是否替换服务端config配置
-        // interfaceConfigOverwrite: jitsiInterFace, // 是否替换服务端interface配置
-        noSSL: false
-      })
-      this.jitsi.addEventListeners({
-        readyToClose: () => {
-          this.disposeVideo()
-        }
-      })
-    },
     send() {
-      // window.open('meet','_blank')
-      this.socket.emit('wg', 'www.')
+      const sts = this.rooms.filter((item) =>
+        this.checkboxGroup1.includes(item.id)
+      );
+      this.socket.emit("call", sts, (caller) => {
+        this.goMeet(caller);
+      });
     },
-    disposeVideo() {
-      this.jitsi.dispose()
-    }
-  }
-}
+    close() {
+      this.calling = false;
+    },
+    sure() {
+      this.calling = false;
+      this.goMeet(this.caller);
+    },
+    goMeet(caller) {
+      // this.$router.push({
+      //   path: "/meet",
+      //   query: {
+      //     name: caller.name,
+      //     id: caller.id,
+      //   },
+      // });
+      window.open("meet?name=" + caller.name + "&id=" + caller.id, "_blank");
+    },
+  },
+};
 </script>
 
 <style>
@@ -89,7 +113,8 @@ export default {
 }
 
 .title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   display: block;
   font-weight: 300;
   font-size: 100px;

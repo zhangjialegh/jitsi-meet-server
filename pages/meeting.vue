@@ -1,40 +1,34 @@
 <template>
-  <div>
-    <div class="container-meet" id="jitsi_meet"></div>
-    <el-dialog
-      title="提示"
-      :visible.sync="visible"
-      width="30%"
-      center
-      :show-close="false"
-      append-to-body
-    >
-      <span>会话结束，请关闭当前页面</span>
-    </el-dialog>
-  </div>
+  <div class="container-meet" id="jitsi_meet"></div>
 </template>
 
 <script>
 export default {
-  asyncData({ query }) {
-    return {
-      query,
-    };
-  },
   data() {
     return {
+      socket: null,
       jitsi: null,
-      visible: false,
     };
   },
   mounted() {
-    this.initJitsi(this.query);
+    this.socket = this.$io("http://localhost:3000", {
+      reconnectionDelayMax: 10000,
+      // path: '/meet',
+      query: {
+        token: "123",
+        listener: "wg",
+      },
+    });
+    this.socket.on("connect", () => {
+      console.log(this.socket.connected); // true
+    });
+    this.initJitsi();
   },
   methods: {
-    initJitsi(mt) {
+    initJitsi(name) {
       const domin = "im-tj.btzh.cn";
       this.jitsi = new window.JitsiMeetExternalAPI(domin, {
-        roomName: mt.name || `abc${Date.now()}_` + (Math.random() * 80 + 20),
+        roomName: name || `abc${Date.now()}_` + (Math.random() * 80 + 20),
         width: "100%",
         height: "100%",
         parentNode: document.querySelector("#jitsi_meet"),
@@ -42,7 +36,6 @@ export default {
         // interfaceConfigOverwrite: jitsiInterFace, // 是否替换服务端interface配置
         noSSL: false,
       });
-      this.jitsi.executeCommand("displayName", mt.id);
       this.jitsi.addEventListeners({
         readyToClose: () => {
           this.disposeVideo();
@@ -56,9 +49,13 @@ export default {
         });
       }, 4000);
     },
+    send() {
+      this.socket.emit("wg", {
+        text: "hello world",
+      });
+    },
     disposeVideo() {
       this.jitsi.dispose();
-      this.visible = true;
     },
   },
 };
