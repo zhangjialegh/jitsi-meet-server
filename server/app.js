@@ -22,7 +22,7 @@ app.use(
 );
 
 global.isDev = false;
-const env = app.env;
+const env = process.env.NODE_ENV;
 if (env == "development") {
   //坑点 设置环境的时候 注意空格
   global.host = "http://127.0.0.1:3000/";
