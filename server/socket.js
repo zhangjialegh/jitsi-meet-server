@@ -1,38 +1,47 @@
 const sIO = require("socket.io");
-let rooms = [];
+let roomMap = {}
 function socketIO(server) {
   const io = sIO(server, {
-    path: "/custom"
+    path: "/nuxt.socket"
   });
   // middleware
   io.use((socket, next) => {
-    let token = socket.handshake.query.token;
+    const { token,room } = socket.handshake.query
     if (token) {
-      return next();
+      if (room) {
+        if (!roomMap[room]) {
+          roomMap[room] = []
+        }
+        return next();
+      } else {
+        return next(new Error("create room error"));
+      }
     }
     return next(new Error("authentication error"));
   });
 
   io.on("connection", function(socket) {
+    const { room, name } = socket.handshake.query
     socket.on("call", function(sts, cb) {
-      const name = Date.now() + "_" + socket.id;
-      const caller = { callerid: socket.id, name };
+      const roomName = Date.now() + "_" + socket.id;
+      const caller = { callerid: socket.id, roomName, name };
       sts.forEach(item => {
         socket.broadcast.emit("call_" + item.id, { ...caller, id: item.id });
       });
       cb({ ...caller, id: socket.id });
     });
 
-    rooms.push({
-      id: socket.id
+    roomMap[room].push({
+      id: socket.id,
+      name
     });
-    socket.broadcast.emit("rooms", rooms);
-    socket.emit("rooms", rooms);
+    socket.broadcast.emit(`rooms_${room}`, roomMap[room]);
+    socket.emit(`rooms_${room}`, roomMap[room]);
 
     socket.on("disconnecting", reason => {
-      rooms = rooms.filter(item => item.id !== socket.id);
-      socket.broadcast.emit("rooms", rooms);
-      socket.emit("rooms", rooms);
+      roomMap[room] = roomMap[room].filter(item => item.id !== socket.id);
+      socket.broadcast.emit(`rooms_${room}`, roomMap[room]);
+      socket.emit(`rooms_${room}`, roomMap[room]);
     });
   });
 }
