@@ -35,6 +35,11 @@
 
 <script>
 export default {
+  asyncData({isDev}) {
+    return {
+      isDev
+    }
+  },
   data() {
     return {
       socket: null,
@@ -51,7 +56,8 @@ export default {
     }
   },
   mounted() {
-    this.socket = this.$io("http://localhost:4004", {
+    const url = this.isDev ? 'http://localhost:4004' : 'https://im.jialekoi.cn'
+    this.socket = this.$io(url, {
       reconnectionDelayMax: 10000,
       path: "/custom",
       query: {

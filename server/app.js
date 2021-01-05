@@ -25,10 +25,10 @@ global.isDev = false;
 const env = app.env;
 if (env == "development") {
   //坑点 设置环境的时候 注意空格
-  global.host = "http://127.0.0.1:4000/";
+  global.host = "http://127.0.0.1:3000/";
   global.isDev = true;
 } else if (env == "production") {
-  global.host = "http://xx.xxx.com/";
+  global.host = "https://im.jialekoi.cn/";
 }
 
 //拦截静态资源 开始
@@ -45,7 +45,7 @@ async function start() {
   const nuxt = new Nuxt(nuxtConfig);
   const {
     host = process.env.HOST || "127.0.0.1",
-    port = process.env.PORT || 4000
+    port = process.env.PORT || 3000
   } = nuxt.options.server;
 
   if (nuxtConfig.dev) {
