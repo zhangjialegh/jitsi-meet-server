@@ -6,6 +6,7 @@ const server = require("http").Server(app.callback());
 const { Nuxt, Builder } = require("nuxt");
 const nuxtConfig = require("../nuxt.config.js");
 const socketIO = require("./socket");
+const logger = require('./log4/log4Util')
 
 app.use(
   body({
@@ -40,6 +41,8 @@ app.use(
   })
 );
 
+
+
 nuxtConfig.dev = global.isDev;
 async function start() {
   const nuxt = new Nuxt(nuxtConfig);
@@ -56,6 +59,27 @@ async function start() {
   }
 
   app.on("error", (err, ctx) => {});
+
+  // logger
+  app.use(logger())
+  app.use(async (ctx, next) => {
+    const start = new Date();
+    let ms = new Date() - start;
+    await next();
+    try {
+      // 开始进入到下一个中间件
+      if (ctx.status === 404) {
+        ctx.throw(404);
+      }
+      ms = new Date() - start;
+      // 记录响应日志
+      ctx.logger.logResponse(ctx, ms);
+    } catch (error) {
+      ms = new Date() - start;
+      // 记录异常日志
+      ctx.logger.logError(ctx, error, ms);
+    }
+  });
 
   app.use(async (ctx, next) => {
     if (/api\//.test(ctx.request.url)) {
