@@ -24,7 +24,7 @@ module.exports = {
       ref  : 'origin/master',
       repo : 'git@github.com:zhangjialegh/jitsi-meet-server.git',
       path : '/srv/jitsi-meet-server/',
-      'post-deploy' : 'yarn --registry https://registry.npm.taobao.org/ && pm2 reload ecosystem.config.js --env production'
+      'post-deploy' : 'yarn --registry https://registry.npm.taobao.org/ && yarn build && pm2 reload ecosystem.config.js --env production'
     }
   }
 };
