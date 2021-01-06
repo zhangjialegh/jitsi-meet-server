@@ -2,7 +2,7 @@ module.exports = {
   // Global page headers (https://go.nuxtjs.dev/config-head)
   telemetry: false,
   head: {
-    title: "nuxt-jitsi",
+    title: "jitsi-meet-server",
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -45,6 +45,6 @@ module.exports = {
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
-    transpile: [/^element-ui/, "socket.io-client"]
+    transpile: [/^element-ui/]
   }
 };

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # 当发生错误时中止脚本
 set -e
@@ -25,6 +25,8 @@ echo '+++++++++++++++开始部署+++++++++++++++++++++'
 ssh root@123.57.1.92 << EOF
 cd /tmp
 unzip -o .nuxt.zip -d /srv/jitsi-meet-server/
+cd /srv/jitsi-meet-server/
+git pull
 npm run server
 rm .nuxt.zip
 EOF
