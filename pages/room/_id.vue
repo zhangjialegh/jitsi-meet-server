@@ -91,7 +91,7 @@ export default {
         reconnectionDelayMax: 10000,
         path: '/nuxt.socket',
         query: {
-          token: '123',
+          token: 'test',
           room: this.id,
           name
         }
@@ -109,8 +109,8 @@ export default {
           type: 'success'
         })
         this.socket.on(`rooms_${this.id}`, (m) => {
-          const addUser = m.filter((item) => !this.rooms.find((ele) => ele.id === item.id)).filter(item => item.id !== this.socket.id)
-          const delUser = this.rooms.filter((item) => !m.find((ele) => ele.id === item.id)).filter(item => item.id !== this.socket.id)
+          const addUser = m.filter((item) => !this.rooms.find((ele) => ele.id === item.id)).filter((item) => item.id !== this.socket.id)
+          const delUser = this.rooms.filter((item) => !m.find((ele) => ele.id === item.id)).filter((item) => item.id !== this.socket.id)
           if (addUser && addUser.length) {
             addUser.forEach((item) => {
               setTimeout(() => {
@@ -169,7 +169,7 @@ export default {
     },
     sure() {
       this.calling = false
-      this.goMeet(this.caller)
+      this.goMeet({ ...this.caller, name: this.form.name })
     },
     goMeet(caller) {
       // this.$router.push({

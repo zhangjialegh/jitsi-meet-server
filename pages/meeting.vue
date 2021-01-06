@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     initJitsi(name) {
-      const domin = "im-tj.btzh.cn";
+      const domin = "meet.jit.si";
       this.jitsi = new window.JitsiMeetExternalAPI(domin, {
         roomName: name || `abc${Date.now()}_` + (Math.random() * 80 + 20),
         width: "100%",
