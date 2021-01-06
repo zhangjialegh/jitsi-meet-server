@@ -9,7 +9,8 @@
     "generate": "nuxt generate",
     "server:start": "set NODE_ENV=production&&nodemon server/app.js",
     "server:dev": "set NODE_ENV=development&&nodemon server/app.js",
-    "server": "pm2 start ecosystem.config.js --env production"
+    "server": "pm2 start ecosystem.config.js --env production",
+    "deploy": "node server/deploy"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.12.4",
@@ -22,6 +23,7 @@
     "koa-static": "^5.0.0",
     "log4js": "^6.3.0",
     "nuxt": "^2.14.6",
+    "ora": "^5.2.0",
     "socket.io": "^3.0.4"
   },
   "devDependencies": {}
