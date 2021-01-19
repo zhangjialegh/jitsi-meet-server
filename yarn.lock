@@ -6484,6 +6484,18 @@ postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.17, postcss@^7.0.2
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
+postis-plus@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/postis-plus/-/postis-plus-1.0.1.tgz#d23e4b60a74f1cff2c7f121f82890298649bd7c7"
+  integrity sha512-m6KLL0o6V9WHmnPoTBXSqM/gksz785jFJfA6vNhR4xKFiqi1lXpI/u7Yw2rARILnHqpe6l04xuWkgHQnQnkGSQ==
+  dependencies:
+    postis "^2.2.0"
+
+postis@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.npm.taobao.org/postis/download/postis-2.2.0.tgz#dc5e323765985ddfdcbfdafc3141a9569aef75a9"
+  integrity sha1-3F4yN2WYXd/cv9r8MUGpVprvdak=
+
 prepend-http@^1.0.0:
   version "1.0.4"
   resolved "https://registry.npmjs.org/prepend-http/-/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"

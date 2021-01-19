@@ -1,16 +1,16 @@
 const sIO = require("socket.io");
-let roomMap = {}
+let roomMap = {};
 function socketIO(server) {
   const io = sIO(server, {
     path: "/nuxt.socket"
   });
   // middleware
   io.use((socket, next) => {
-    const { token,room } = socket.handshake.query
+    const { token, room } = socket.handshake.query;
     if (token) {
       if (room) {
         if (!roomMap[room]) {
-          roomMap[room] = []
+          roomMap[room] = [];
         }
         return next();
       } else {
@@ -21,25 +21,27 @@ function socketIO(server) {
   });
 
   io.on("connection", function(socket) {
-    const { room, name } = socket.handshake.query
+    const { room, name, id } = socket.handshake.query;
     socket.on("call", function(sts, cb) {
-      const roomName = Date.now() + "_" + socket.id;
-      const caller = { callerid: socket.id, roomName, name };
+      const roomName = Date.now() + "_" + id;
+      const caller = { callerid: id, roomName, name };
       sts.forEach(item => {
         socket.broadcast.emit("call_" + item.id, { ...caller, id: item.id });
       });
-      cb({ ...caller, id: socket.id });
+      cb({ ...caller, id: id });
     });
 
-    roomMap[room].push({
-      id: socket.id,
-      name
-    });
-    socket.broadcast.emit(`rooms_${room}`, roomMap[room]);
-    socket.emit(`rooms_${room}`, roomMap[room]);
-
+    const tar = roomMap[room].find(item => item.id === id);
+    if (!tar) {
+      roomMap[room].push({
+        id: id,
+        name
+      });
+      socket.broadcast.emit(`rooms_${room}`, roomMap[room]);
+      socket.emit(`rooms_${room}`, roomMap[room]);
+    }
     socket.on("disconnecting", reason => {
-      roomMap[room] = roomMap[room].filter(item => item.id !== socket.id);
+      roomMap[room] = roomMap[room].filter(item => item.id !== id);
       socket.broadcast.emit(`rooms_${room}`, roomMap[room]);
       socket.emit(`rooms_${room}`, roomMap[room]);
     });

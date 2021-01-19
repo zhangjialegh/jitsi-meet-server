@@ -1,8 +1,8 @@
 <template>
   <el-container>
-    <el-header class="room-header"
-      ><el-avatar> {{ form.name }} </el-avatar></el-header
-    >
+    <el-header class="room-header">
+      <el-avatar> {{ form.name }} </el-avatar>
+    </el-header>
     <el-main class="room-main">
       <el-form class="demo-dynamic">
         <el-form-item>
@@ -14,10 +14,7 @@
       <el-button type="primary" size="medium" circle icon="el-icon-phone-outline" @click="send" class="send-btn"></el-button>
     </el-main>
     <el-dialog title="提示" :visible.sync="calling" width="30%" center append-to-body>
-      <span
-        >来自<strong style="color: red">{{ caller && caller.name }}</strong
-        >的通话请求</span
-      >
+      <span>来自<strong style="color: red">{{ caller && caller.name }}</strong>的通话请求</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="close">取 消</el-button>
         <el-button type="primary" @click="sure">确 定</el-button>
@@ -37,13 +34,13 @@
 
 <script>
 export default {
-  asyncData({ isDev, params }) {
+  asyncData ({ isDev, params }) {
     return {
       isDev,
       id: params.id
     }
   },
-  data() {
+  data () {
     return {
       socket: null,
       jitsi: null,
@@ -57,15 +54,16 @@ export default {
       },
       form: {
         name: ''
-      }
+      },
+      itemId: null
     }
   },
-  destroyed() {
+  destroyed () {
     if (this.socket) {
       this.socket.disconnect()
     }
   },
-  mounted() {
+  mounted () {
     const name = sessionStorage.getItem(`socket_room_${this.id}`)
     if (!name) {
       this.nameInit = true
@@ -75,7 +73,7 @@ export default {
     }
   },
   methods: {
-    beforeSocket() {
+    beforeSocket () {
       this.$refs.roomForm.validate((valid) => {
         if (valid) {
           sessionStorage.setItem(`socket_room_${this.id}`, this.form.name)
@@ -84,7 +82,8 @@ export default {
         }
       })
     },
-    initSocket(name) {
+    initSocket (name) {
+      this.itemId = Date.now()
       const url = this.isDev ? 'http://localhost:4004' : 'https://im.jialekoi.cn'
       this.socket = this.$io(url, {
         transports: ['websocket'],
@@ -93,7 +92,8 @@ export default {
         query: {
           token: 'test',
           room: this.id,
-          name
+          name,
+          id: this.itemId
         }
       })
       // on reconnection, reset the transports option, as the Websocket
@@ -109,8 +109,8 @@ export default {
           type: 'success'
         })
         this.socket.on(`rooms_${this.id}`, (m) => {
-          const addUser = m.filter((item) => !this.rooms.find((ele) => ele.id === item.id)).filter((item) => item.id !== this.socket.id)
-          const delUser = this.rooms.filter((item) => !m.find((ele) => ele.id === item.id)).filter((item) => item.id !== this.socket.id)
+          const addUser = m.filter((item) => !this.rooms.find((ele) => ele.id === item.id)).filter((item) => item.id !== this.itemId)
+          const delUser = this.rooms.filter((item) => !m.find((ele) => ele.id === item.id)).filter((item) => item.id !== this.itemId)
           if (addUser && addUser.length) {
             addUser.forEach((item) => {
               setTimeout(() => {
@@ -134,10 +134,10 @@ export default {
             })
           }
           this.$nextTick(() => {
-            this.rooms = m.filter((item) => item.id !== this.socket.id)
+            this.rooms = m.filter((item) => item.id !== this.itemId)
           })
         })
-        this.socket.on('call_' + this.socket.id, (caller) => {
+        this.socket.on('call_' + this.itemId, (caller) => {
           this.calling = true
           this.caller = caller
         })
@@ -157,21 +157,21 @@ export default {
         })
       })
     },
-    send() {
+    send () {
       if (!this.checkboxGroup1.length) return
       const sts = this.rooms.filter((item) => this.checkboxGroup1.includes(item.id))
       this.socket.emit('call', sts, (caller) => {
         this.goMeet(caller)
       })
     },
-    close() {
+    close () {
       this.calling = false
     },
-    sure() {
+    sure () {
       this.calling = false
       this.goMeet({ ...this.caller, name: this.form.name })
     },
-    goMeet(caller) {
+    goMeet (caller) {
       // this.$router.push({
       //   path: "/meet",
       //   query: {

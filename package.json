@@ -24,6 +24,7 @@
     "log4js": "^6.3.0",
     "nuxt": "^2.14.6",
     "ora": "^5.2.0",
+    "postis-plus": "^1.0.1",
     "socket.io": "^3.0.4"
   },
   "devDependencies": {}
